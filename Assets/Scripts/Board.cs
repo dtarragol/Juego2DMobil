@@ -15,6 +15,8 @@ public class Board : MonoBehaviour
     public float cameraSizeOffset;
     public float cameraVerticalOffset;
 
+    public int PointsPerMatch;
+
     public GameObject[] availablePieces;
 
     Tile[,] Tiles;
@@ -114,17 +116,17 @@ public class Board : MonoBehaviour
 
     public void TileDown(Tile tile_)
     {
-        if(!swappingPieces) startTile = tile_;
+        if(!swappingPieces && GameManager.Instance.gameState==GameManager.GameState.InGame) startTile = tile_;
     }
 
     public void TileOver(Tile tile_)
     {
-        if (!swappingPieces) endTile = tile_;
+        if (!swappingPieces && GameManager.Instance.gameState == GameManager.GameState.InGame) endTile = tile_;
     }
 
     public void TileUp(Tile tile_)
     {
-        if (!swappingPieces)
+        if (!swappingPieces && GameManager.Instance.gameState == GameManager.GameState.InGame)
         {
             if (startTile != null && endTile != null && IsCloseTo(startTile, endTile))
             {
@@ -162,6 +164,7 @@ public class Board : MonoBehaviour
         else
         {
             ClearPieces(allMatches);
+            AwardPoints(allMatches);
         }
         startTile = null;
         endTile = null;
@@ -197,6 +200,7 @@ public class Board : MonoBehaviour
             {
                 newMatches = newMatches.Union(matches).ToList();
                 ClearPieces(matches);
+                AwardPoints(matches);
             }
         });
         if (newMatches.Count > 0)
@@ -343,6 +347,11 @@ public class Board : MonoBehaviour
             FoundMatches = FoundMatches.Union(horizontalMatches).ToList();
         }
         return FoundMatches;
+    }
+
+    public void AwardPoints(List<Piece> allMatches)
+    {
+        GameManager.Instance.AddPoints(allMatches.Count * PointsPerMatch);
     }
 
 }
