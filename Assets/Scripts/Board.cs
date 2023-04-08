@@ -36,7 +36,31 @@ public class Board : MonoBehaviour
 
         SetupBoard();
         PositionCamera();
-        StartCoroutine(SetupPieces());
+
+        if(GameManager.Instance.gameState == GameManager.GameState.InGame)
+        {
+            StartCoroutine(SetupPieces());
+        }
+
+        GameManager.Instance.OnGameStateUpdated.AddListener(OnGameStateUpdated);
+        
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.Instance.OnGameStateUpdated.RemoveListener(OnGameStateUpdated);
+    }
+
+    private void OnGameStateUpdated(GameManager.GameState newState)
+    {
+        if (newState == GameManager.GameState.InGame)
+        {
+            StartCoroutine(SetupPieces());
+        }
+        if (newState == GameManager.GameState.GameOver)
+        {
+            ClearAllPieces();
+        }
     }
 
     private IEnumerator SetupPieces()
@@ -84,6 +108,17 @@ public class Board : MonoBehaviour
         Pieces[x, y].Setup(x, y, this);
         Pieces[x, y].Move(x, y);
         return Pieces[x, y];
+    }
+
+    private void ClearAllPieces()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                ClearPieceAt(x, y);
+            }
+        }
     }
 
     private void PositionCamera()
